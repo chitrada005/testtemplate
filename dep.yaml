@@ -1,4 +1,4 @@
-template-file-path: testtemplate/Vx-S3.yaml
+template-file-path: Vx-S3.yaml
 parameters:
   BucketName: hciradtestbucket
   Environment: dev
