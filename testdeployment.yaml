@@ -1,0 +1,6 @@
+template-file-path: Vx-S3.yaml
+parameters:
+  BucketName: testhchirrad
+  Environment: dev
+  LoggingBucketName: vlaues3
+tags: {}
