@@ -1,0 +1,68 @@
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name of the S3 bucket
+
+  Environment:
+    Type: String
+    Description: Environment name (e.g., dev, prod)
+
+  LoggingBucketName:
+    Type: String
+    Description: Name of the destination bucket where access logs will be stored
+
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Ref BucketName
+
+      # S3.1, S3.2, S3.11 - Block all public access
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+      # S3.12 - Lifecycle rule to transition and expire objects
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            ExpirationInDays: 36500
+            Id: CleanupRule
+            Prefix: ""
+
+      # S3.13 - Enable server access logging
+      LoggingConfiguration:
+        DestinationBucketName: !Ref LoggingBucketName
+        LogFilePrefix: !Sub "${Environment}/${BucketName}/"
+
+      # S3.24 - Apply tags for tracking ownership and compliance
+      Tags:
+        - Key: Name
+          Value: !Sub "${Environment}-${BucketName}"
+        - Key: Type
+          Value: S3
+        - Key: Project
+          Value: auto-aws-infra
+
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: EnforceSSL
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "${S3Bucket.Arn}"
+              - !Sub "${S3Bucket.Arn}/*"
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
