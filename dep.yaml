@@ -1,6 +1,6 @@
 template-file-path: Vx-S3.yaml
 parameters:
-  BucketName: hciradtestbucket
+  BucketName: teshchitrad
   Environment: dev
-  LoggingBucketName: logaccedss
+  LoggingBucketName: logaccesbuck
 tags: {}
